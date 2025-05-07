@@ -1,0 +1,122 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Feliz Cumpleaños, Mi Amor</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #f8f4f0;
+            color: #4a3e3e;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            text-align: center;
+            padding: 40px;
+            background-color: #d8cfc4;
+        }
+        header h1 {
+            font-size: 2.8em;
+            margin: 0;
+        }
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            background-color: #b6a89e;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -1.5px;
+        }
+        .timeline-entry {
+            padding: 20px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        .timeline-entry::after {
+            content: ' ';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background-color: #b6a89e;
+            border: 3px solid #fff;
+            top: 30px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .left {
+            left: 0;
+        }
+        .right {
+            left: 50%;
+        }
+        .right::after {
+            left: -10px;
+        }
+        .timeline-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        .timeline-content h3 {
+            margin-top: 0;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            background-color: #d8cfc4;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>dedicado a mi roxa, mi morenita querida</h1>
+    <p>Una mirada atrás a nuestros momentos más especiales</p>
+</header>
+
+<div class="timeline">
+    <div class="timeline-entry left">
+        <div class="timeline-content">
+            <h3> Nuestro Primer Encuentro</h3>
+            <p>El día en que tu sonrisa cambió mi mundo para siempre.</p>
+        </div>
+    </div>
+    <div class="timeline-entry right">
+        <div class="timeline-content">
+            <h3>Nuestro Primera salida en tu pumpe</h3>
+            <p>Una noche llena de risas, comida y muchas pero muchas risotas.</p>
+        </div>
+    </div>
+    <div class="timeline-entry left">
+        <div class="timeline-content">
+            <h3>algunos problemitas</h3>
+            <p>pero siempre saliendo adelante pumpum.</p>
+        </div>
+    </div>
+    <div class="timeline-entry right">
+        <div class="timeline-content">
+            <h3>nuestra graduacion</h3>
+            <p>este dia fue muy especial para nosotros, nuestro primer grupo juntos .</p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>Con todo mi amor, para siempre. 💖</p>
+</footer>
+
+</body>
+</html>
