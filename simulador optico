@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Simulador Comunicación Óptica con CRC-8</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 0 15px;
+    background: #f0f0f0;
+    color: #222;
+  }
+  h1 {
+    text-align: center;
+  }
+  textarea {
+    width: 100%;
+    height: 70px;
+    font-size: 16px;
+  }
+  label {
+    display: block;
+    margin: 15px 0 8px;
+    font-weight: bold;
+  }
+  button {
+    background: #0066cc;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  button:hover {
+    background: #004999;
+  }
+  #output {
+    margin-top: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  }
+  .pulses {
+    display: flex;
+    margin-top: 10px;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .pulse {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #333;
+    opacity: 0.2;
+    transition: opacity 0.3s;
+  }
+  .flash {
+    background: #ffdd00;
+    opacity: 1;
+    box-shadow: 0 0 8px 3px #ffdd00;
+  }
+  .result-success {
+    color: green;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  .result-error {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Simulador Comunicación Óptica con CRC-8</h1>
+
+<label for="inputText">Mensaje a transmitir:</label>
+<textarea id="inputText" placeholder="Escribe tu mensaje aquí"></textarea>
+
+<label><input type="checkbox" id="injectError" /> Introducir error en la transmisión</label>
+
+<button id="sendBtn">Transmitir</button>
+
+<div id="output" hidden>
+  <div><strong>Secuencia óptica:</strong></div>
+  <div class="pulses" id="pulsesContainer"></div>
+  <div id="resultMessage"></div>
+</div>
+
+<script>
+// --- Funciones auxiliares ---
+
+// Convierte texto a binario ASCII
+function textToBinary(text) {
+  return text.split('').map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('');
+}
+
+// Convierte binario a texto ASCII
+function binaryToText(binary) {
+  let result = '';
+  for (let i = 0; i < binary.length; i += 8) {
+    const byte = binary.slice(i, i + 8);
+    result += String.fromCharCode(parseInt(byte, 2));
+  }
+  return result;
+}
+
+// Calcula CRC-8 (polinomio x^8 + x^2 + x + 1, 0x07)
+function calculateCRC8(bytes) {
+  const poly = 0x07;
+  let crc = 0;
+  for (const byte of bytes) {
+    crc ^= byte;
+    for (let i = 0; i < 8; i++) {
+      if (crc & 0x80) {
+        crc = ((crc << 1) ^ poly) & 0xFF;
+      } else {
+        crc = (crc << 1) & 0xFF;
+      }
+    }
+  }
+  return crc;
+}
+
+// Simula la transmisión óptica
+function simulateOpticalTransmission(binStr) {
+  return binStr.split('').map(bit => bit === '1' ? 'flash' : 'dark');
+}
+
+// Convierte la señal óptica de vuelta a binario
+function receiveOpticalSignal(signal) {
+  return signal.map(p => p === 'flash' ? '1' : '0').join('');
+}
+
+// Introduce un error en un bit aleatorio
+function introduceError(binStr) {
+  const index = Math.floor(Math.random() * binStr.length);
+  const corrupted = binStr.split('');
+  corrupted[index] = corrupted[index] === '1' ? '0' : '1';
+  return { corruptedStr: corrupted.join(''), errorIndex: index };
+}
+
+// Convierte binario a array de bytes
+function binaryToBytes(binStr) {
+  let bytes = [];
+  for (let i = 0; i < binStr.length; i += 8) {
+    bytes.push(parseInt(binStr.slice(i, i + 8), 2));
+  }
+  return bytes;
+}
+
+// --- Lógica principal ---
+
+document.getElementById('sendBtn').addEventListener('click', () => {
+  const inputText = document.getElementById('inputText').value.trim();
+  const injectError = document.getElementById('injectError').checked;
+  const outputDiv = document.getElementById('output');
+  const pulsesContainer = document.getElementById('pulsesContainer');
+  const resultMessage = document.getElementById('resultMessage');
+
+  if (!inputText) {
+    alert('Por favor, ingresa un mensaje.');
+    return;
+  }
+
+  // 1. Texto a binario
+  const binaryData = textToBinary(inputText);
+  const dataBytes = binaryToBytes(binaryData);
+
+  // 2. Calcular CRC-8
+  const crc = calculateCRC8(dataBytes);
+  const crcBinary = crc.toString(2).padStart(8, '0');
+
+  // 3. Crear cadena completa (datos + CRC)
+  let fullBinary = binaryData + crcBinary;
+
+  // 4. Introducir error si corresponde
+  let errorInfo = "No se introdujeron errores.";
+  if (injectError) {
+    const { corruptedStr, errorIndex } = introduceError(fullBinary);
+    fullBinary = corruptedStr;
+    errorInfo = `Se introdujo un error en el bit ${errorIndex}`;
+  }
+
+  // 5. Simulación de transmisión óptica
+  const opticalSignal = simulateOpticalTransmission(fullBinary);
+
+  // Mostrar visualmente los pulsos ópticos
+  pulsesContainer.innerHTML = '';
+  opticalSignal.forEach(p => {
+    const div = document.createElement('div');
+    div.classList.add('pulse');
+    if (p === 'flash') div.classList.add('flash');
+    pulsesContainer.appendChild(div);
+  });
+
+  // 6. Recepción y decodificación
+  const receivedBinary = receiveOpticalSignal(opticalSignal);
+  const receivedData = receivedBinary.slice(0, -8);
+  const receivedCRC = receivedBinary.slice(-8);
+  const receivedBytes = binaryToBytes(receivedData);
+  const calcCRC = calculateCRC8(receivedBytes);
+
+  // 7. Verificar CRC
+  if (calcCRC === parseInt(receivedCRC, 2)) {
+    resultMessage.innerHTML = `<div class="result-success">✅ Mensaje recibido correctamente: <strong>${binaryToText(receivedData)}</strong><br>${errorInfo}</div>`;
+  } else {
+    resultMessage.innerHTML = `<div class="result-error">❌ Error detectado en la transmisión (CRC no coincide).<br>${errorInfo}</div>`;
+  }
+
+  outputDiv.hidden = false;
+});
+</script>
+
+</body>
+</html>
